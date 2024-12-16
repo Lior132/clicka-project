@@ -123,7 +123,11 @@ const SignUpScreen = ({ onSignUp, navigation }) => {
 
     try {
         // עדכון כתובת ה-API לכתובת ב-Vercel
-        const response = await axios.post('https://clicka-project.vercel.app/singUpUser', { email, password });
+        const response = await axios.post(
+            'https://clicka-project.vercel.app/signUpUser',
+            { email, password },
+            { headers: { 'Content-Type': 'application/json' }, mode: 'no-cors' }
+        );
         console.log(response);
 
         if (response.data.error) {
@@ -137,6 +141,7 @@ const SignUpScreen = ({ onSignUp, navigation }) => {
         console.log(error);
     }
 };
+
 
   return (
     <SafeAreaView style={styles.container}>
