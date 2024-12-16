@@ -114,29 +114,29 @@ const SignUpScreen = ({ onSignUp, navigation }) => {
   };
 
   const handleSighUp = async () => {
-      const {email, password, confirmPassword} = userData;
+    const { email, password, confirmPassword } = userData;
 
-      if (password != confirmPassword){
-        alert("the password not same");
+    if (password !== confirmPassword) {
+        alert("The passwords do not match");
         return;
-      }
+    }
 
-      try{
-        const response = await axios.post('http://localhost:5001/singUpUser', { email, password})
+    try {
+        // עדכון כתובת ה-API לכתובת ב-Vercel
+        const response = await axios.post('https://clicka-project.vercel.app/singUpUser', { email, password });
         console.log(response);
-        
-        if(response.data.error) {
-          alert(response.data.error)
+
+        if (response.data.error) {
+            alert(response.data.error);
         } else {
             setUserData({ email: '', password: '', confirmPassword: '' }); // איפוס שדות לאחר ההרשמה
-          console.log('shalom');
-          navigation.navigate('Login'); // זה החלק החשוב
+            console.log('Hello');
+            navigation.navigate('Login'); // ניווט למסך ההתחברות
         }
-      } catch (error) {
+    } catch (error) {
         console.log(error);
-        
-      }
-  }
+    }
+};
 
   return (
     <SafeAreaView style={styles.container}>
