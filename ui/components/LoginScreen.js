@@ -1,19 +1,36 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Dimensions, Platform, SafeAreaView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { auth, signInWithEmailAndPassword } from '../firebase'; // ייבוא הפונקציה המודולרית
+import axios from 'axios';
 
 const { width, height } = Dimensions.get('window'); // קבלת גודל המסך
 
-// אם רוחב המסך קטן מ-400, אפשר להניח שמדובר במכשירים קטנים יותר (כמו אייפון 12)
-const isSmallScreen = width < 400;
-
 const LoginScreen = ({ onLogin, navigation }) => {
-  const [email, setEmail] = useState('');
+  const [mail, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(''); // מצב של שגיאה
+  const userToken = localStorage.getItem("userToken")
+  // פונקציה להתחברות
+  const handleLogin = async () => {
+    if (!mail || !password) {
+      setError('אנא מלא את כל השדות');
+      return;
+    }
 
-  const nextPage = () => {
-    
-  }
+    try {
+      const response = axios.post('http://localhost:5001/SignUpUserToken', { token: userToken, mail: mail})
+      console.log(response);
+      await signInWithEmailAndPassword(auth, mail, password); // קריאה לפונקציה המודולרית
+      setEmail('');
+      setPassword('');
+      setError('');
+      navigation.navigate("personal-details"); // ניווט אחרי התחברות מוצלחת
+    } catch (error) {
+      console.error("שגיאה בהתחברות:", error);
+      setError('שם משתמש או סיסמה שגויים'); // הצגת הודעת שגיאה
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -25,13 +42,16 @@ const LoginScreen = ({ onLogin, navigation }) => {
           <Text style={styles.title}>Welcome Back</Text>
           <Text style={styles.subtitle}>Log in to your account</Text>
 
+          {/* הצגת שגיאה אם קיימת */}
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
           <TextInput
             style={styles.input}
-            placeholder="Email"
+            placeholder="mail"
             placeholderTextColor="#aaa"
-            value={email}
+            value={mail}
             onChangeText={setEmail}
-            keyboardType="email-address"
+            keyboardType="mail-address"
             autoCapitalize="none"
           />
           <TextInput
@@ -43,7 +63,7 @@ const LoginScreen = ({ onLogin, navigation }) => {
             secureTextEntry
           />
 
-          <TouchableOpacity style={styles.button} onPress={() => onLogin(email, password)}>
+          <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <LinearGradient
               colors={['#4CAF50', '#00C853']}
               style={styles.buttonGradient}
@@ -63,6 +83,7 @@ const LoginScreen = ({ onLogin, navigation }) => {
     </SafeAreaView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {

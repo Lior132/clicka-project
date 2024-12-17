@@ -4,7 +4,8 @@ import { createStackNavigator } from "@react-navigation/stack";
 import OpeningScreen from "./components/OpenScreen";
 import LoginScreen from "./components/LoginScreen";
 import SignUpScreen from "./components/SignUpScreen";
-
+import PersonalDetails from "./components/PersonalDetails";
+import Questions from "./components/Questions";
 const Stack = createStackNavigator();
 
 export default function App() {
@@ -23,6 +24,14 @@ export default function App() {
         <Stack.Screen
           name="SignUp"
           component={SignUpScreen}
+        />
+          <Stack.Screen
+          name="personal-details"
+          component={PersonalDetails}
+        />
+            <Stack.Screen
+          name="questions"
+          component={Questions}
         />
       </Stack.Navigator>
     </NavigationContainer>

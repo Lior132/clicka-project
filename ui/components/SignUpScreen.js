@@ -16,12 +16,14 @@ import * as Google from "expo-auth-session/providers/google";
 import axios from 'axios';
 import facebook from "../imag/facebook.png";
 import {
-  getAuth,
+  // getAuth,
   FacebookAuthProvider,
   signInWithCredential,
-  signInWithPopup, GoogleAuthProvider
+  signInWithPopup ,GoogleAuthProvider
 } from "firebase/auth";
 import { useAuthRequest } from "expo-auth-session";
+import { auth} from "../firebase";
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 const { width, height } = Dimensions.get("window");
 
 const isSmallScreen = width < 400;
@@ -29,8 +31,9 @@ const isSmallScreen = width < 400;
 const SignUpScreen = ({ onSignUp, navigation }) => {
   const [mail, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState('');
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [auth, setAuth] = useState(null);
+  // const [auth, setAuth] = useState(null);
   const [userData, setUserData] = useState({
     mail,
     password,
@@ -51,7 +54,7 @@ const SignUpScreen = ({ onSignUp, navigation }) => {
     try {
       // מבצע את ההתחברות לפייסבוק
       const { type, params } = await promptAsync();
-
+      
       if (type === "success") {
         const token = params.access_token;
 
@@ -81,7 +84,7 @@ const SignUpScreen = ({ onSignUp, navigation }) => {
       alert("Error with Facebook login: " + response.error);
     }
   }, [response]);
-
+  
 
   const [googleRequest, googleResponse, promptGoogleAsync] = Google.useAuthRequest({
     clientId: '868613634026-boge0msthqseaskve4genkviiv3ps50j.apps.googleusercontent.com', // Web Client ID
@@ -92,7 +95,7 @@ const SignUpScreen = ({ onSignUp, navigation }) => {
 
   const handleGoogleLogin = async () => {
     try {
-      if (!googleRequest) {
+      if (!googleRequest ) {
         alert("Request not ready yet");
         return;
       }
@@ -113,32 +116,68 @@ const SignUpScreen = ({ onSignUp, navigation }) => {
     }
   };
 
-  const handleSighUp = async () => {
-    const { mail, password, confirmPassword } = userData;
+  // const handleSighUp = async () => {
+  //     const {email, password, confirmPassword} = userData;
 
-    if (password != confirmPassword) {
-      alert("the password not same");
+  //     if (password != confirmPassword){
+  //       alert("the password not same");
+  //       return;
+  //     }
+
+  //     try{
+  //       const response = await axios.post('http://localhost:5001/singUpUser', { email, password})
+  //       console.log(response);
+        
+  //       if(response.data.error) {
+  //         alert(response.data.error)
+  //       } else {
+  //           setUserData({ email: '', password: '', confirmPassword: '' }); // איפוס שדות לאחר ההרשמה
+  //         console.log('shalom');
+  //         navigation.navigate('Login'); // זה החלק החשוב
+  //       }
+  //     } catch (error) {
+  //       console.log(error);
+        
+  //     }
+  // }
+
+  const handleSignUp = async () => {
+    const { mail, password, confirmPassword } = userData;
+  
+    // בדיקת סיסמאות תואמות
+    if (password !== confirmPassword) {
+      alert("הסיסמאות אינן תואמות");
       return;
     }
-
+  
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5001';
-      const response = await axios.post(`${apiUrl}/singUpUser`, { mail, password }); console.log(response);
-      console.log(response);
+      // יצירת משתמש עם Firebase
+      console.log("auth" ,auth);
+      console.log("mail" ,mail);
+      console.log("password" ,password);
 
-      if (response.data.error) {
-        alert(response.data.error)
-      } else {
-        setUserData({ mail: '', password: '', confirmPassword: '' }); // איפוס שדות לאחר ההרשמה
-        console.log('shalom');
-        navigation.navigate('Login'); // זה החלק החשוב
-      }
+      const response = axios.post('http://localhost:5001/singUpUser', { mail, password})
+        console.log(response);
+      
+      const userCredential = await createUserWithEmailAndPassword(auth, mail, password);
+      const user = userCredential.user;
+  
+      console.log('המשתמש נרשם בהצלחה:', user.mail);
+      
+      localStorage.setItem("userToken", user.uid);
+
+      // איפוס שדות
+      setUserData({ mail: '', password: '', confirmPassword: '' });
+  
+      // ניווט לדף התחברות
+      navigation.navigate('Login');
+
     } catch (error) {
-      console.log(error);
-
+      console.error("שגיאה בהרשמה:", error.message);
+      alert(error.message);  // הצגת הודעת שגיאה למשתמש
     }
-  }
-
+  };
+  
   return (
     <SafeAreaView style={styles.container}>
       <LinearGradient colors={["#9313e8", "#e81328"]} style={styles.container}>
@@ -174,7 +213,7 @@ const SignUpScreen = ({ onSignUp, navigation }) => {
 
           <TouchableOpacity
             style={styles.button}
-            onPress={handleSighUp}
+            onPress={handleSignUp}
           >
             <LinearGradient
               colors={["#4CAF50", "#00C853"]}
@@ -192,7 +231,7 @@ const SignUpScreen = ({ onSignUp, navigation }) => {
               <Image
                 source={require("../imag/google.png")} // עדכן את הנתיב בהתאם למיקום האייקון שלך
                 style={styles.socialIcon}
-              // disabled={!isRequestReady}
+                // disabled={!isRequestReady}
               />
               <Text style={styles.socialText}>Sign Up with Google</Text>
             </TouchableOpacity>
