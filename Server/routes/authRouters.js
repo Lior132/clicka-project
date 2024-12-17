@@ -1,18 +1,16 @@
-// const express = require("express");
-// const router = express.Router();
-// const mongoose = require("mongoose");
-
-
-// const { SignUpUser } = require("../controllers/outhController");
-
-// router.post("/signUpUser", SignUpUser);
-// module.exports = router;
-
 const express = require("express");
 const router = express.Router();
+const cors = require("cors");
+const mongoose = require("mongoose");
+
+
 const { SignUpUser } = require("../controllers/outhController");
 
-// הגדרת הנתיב של יצירת משתמש
-router.post("/signUpUser", SignUpUser);
+router.use(cors({
+    credentials: true,
+    origin: "http://localhost:8081",
+  })
+);
 
+router.post("/singUpUser", SignUpUser);
 module.exports = router;

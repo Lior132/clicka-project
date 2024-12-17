@@ -1,6 +1,6 @@
 // const express = require('express');
 // const dotenv = require('dotenv').config();
-// const cors = require('cors');
+// // const cors = require('cors');
 // const mongoose = require('mongoose')
 // // const cookieParser = require('cookie-parser');
 // const app = express();
@@ -11,54 +11,38 @@
 
 // app.use(express.json());
 
-
 // // רוטים
 // app.use('/', require('./routes/authRouters'));
 
 // // הפעלת השרת
-// // const PORT = process.env.PORT || 5001;
-// router.use(cors({
-//   credentials: true,
-//   origin: "https://clicka-project.vercel.app",
-// })
-// );
+// const PORT = process.env.PORT || 5001;
+// app.listen(PORT, () => {
+//     console.log(`Server is running on port yes ${PORT}`);
+// });
 
+const express = require('express');
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
 
+// טוען משתני סביבה רק אם רץ מקומית (ב-Vercel זה לא חובה)
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config();
+}
 
-const express = require("express");
-const dotenv = require("dotenv").config();
-const cors = require("cors");
-const mongoose = require("mongoose");
 const app = express();
 
-// קישור למסד הנתונים
+// חיבור למסד הנתונים
 mongoose.connect(process.env.DATABASE_URL)
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("Connection error:", err));
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('Connection error:', err));
 
 app.use(express.json());
 
-// הגדרת CORS בצורה נכונה
-const allowedOrigins = ["http://localhost:8081", "https://clicka-project.vercel.app"];
-
-app.use(cors({
-  origin: function(origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      return callback(null, true);
-    }
-    return callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true,  // חשוב להוסיף את זה במקרה שאתה שולח מידע שדורש credentials
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // הוספת האפשרות ל-OPTIONS ו-POST
-}));
-
-// זה מבצע את ה-preflight עבור כל הבקשות
-app.options('*', cors());
-
-// הגדרת הנתיב של יצירת משתמש
-const authRouter = require("./routes/authRouters");
-app.use("/", authRouter);
+// רוטים
+app.use('/', require('./routes/authRouters'));
 
 // הפעלת השרת
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
