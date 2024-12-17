@@ -19,7 +19,7 @@ import {
   getAuth,
   FacebookAuthProvider,
   signInWithCredential,
-  signInWithPopup ,GoogleAuthProvider
+  signInWithPopup, GoogleAuthProvider
 } from "firebase/auth";
 import { useAuthRequest } from "expo-auth-session";
 const { width, height } = Dimensions.get("window");
@@ -27,12 +27,12 @@ const { width, height } = Dimensions.get("window");
 const isSmallScreen = width < 400;
 
 const SignUpScreen = ({ onSignUp, navigation }) => {
-  const [email, setEmail] = useState("");
+  const [mail, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [auth, setAuth] = useState(null);
   const [userData, setUserData] = useState({
-    email,
+    mail,
     password,
     confirmPassword
   });
@@ -51,7 +51,7 @@ const SignUpScreen = ({ onSignUp, navigation }) => {
     try {
       // מבצע את ההתחברות לפייסבוק
       const { type, params } = await promptAsync();
-      
+
       if (type === "success") {
         const token = params.access_token;
 
@@ -81,7 +81,7 @@ const SignUpScreen = ({ onSignUp, navigation }) => {
       alert("Error with Facebook login: " + response.error);
     }
   }, [response]);
-  
+
 
   const [googleRequest, googleResponse, promptGoogleAsync] = Google.useAuthRequest({
     clientId: '868613634026-boge0msthqseaskve4genkviiv3ps50j.apps.googleusercontent.com', // Web Client ID
@@ -92,7 +92,7 @@ const SignUpScreen = ({ onSignUp, navigation }) => {
 
   const handleGoogleLogin = async () => {
     try {
-      if (!googleRequest ) {
+      if (!googleRequest) {
         alert("Request not ready yet");
         return;
       }
@@ -114,28 +114,29 @@ const SignUpScreen = ({ onSignUp, navigation }) => {
   };
 
   const handleSighUp = async () => {
-      const {email, password, confirmPassword} = userData;
+    const { mail, password, confirmPassword } = userData;
 
-      if (password != confirmPassword){
-        alert("the password not same");
-        return;
-      }
+    if (password != confirmPassword) {
+      alert("the password not same");
+      return;
+    }
 
-      try{
-        const response = await axios.post('http://localhost:5001/singUpUser', { email, password})
-        console.log(response);
-        
-        if(response.data.error) {
-          alert(response.data.error)
-        } else {
-            setUserData({ email: '', password: '', confirmPassword: '' }); // איפוס שדות לאחר ההרשמה
-          console.log('shalom');
-          navigation.navigate('Login'); // זה החלק החשוב
-        }
-      } catch (error) {
-        console.log(error);
-        
+    try {
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+      const response = await axios.post(`${apiUrl}/singUpUser`, { mail, password }); console.log(response);
+      console.log(response);
+
+      if (response.data.error) {
+        alert(response.data.error)
+      } else {
+        setUserData({ mail: '', password: '', confirmPassword: '' }); // איפוס שדות לאחר ההרשמה
+        console.log('shalom');
+        navigation.navigate('Login'); // זה החלק החשוב
       }
+    } catch (error) {
+      console.log(error);
+
+    }
   }
 
   return (
@@ -149,8 +150,8 @@ const SignUpScreen = ({ onSignUp, navigation }) => {
             style={styles.input}
             placeholder="Email"
             placeholderTextColor="#aaa"
-            value={userData.email}
-            onChangeText={text => setUserData({ ...userData, email: text })}
+            value={userData.mail}
+            onChangeText={text => setUserData({ ...userData, mail: text })}
             keyboardType="email-address"
             autoCapitalize="none"
           />
@@ -191,7 +192,7 @@ const SignUpScreen = ({ onSignUp, navigation }) => {
               <Image
                 source={require("../imag/google.png")} // עדכן את הנתיב בהתאם למיקום האייקון שלך
                 style={styles.socialIcon}
-                // disabled={!isRequestReady}
+              // disabled={!isRequestReady}
               />
               <Text style={styles.socialText}>Sign Up with Google</Text>
             </TouchableOpacity>

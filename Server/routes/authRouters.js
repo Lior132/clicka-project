@@ -8,7 +8,7 @@ const { SignUpUser } = require("../controllers/outhController");
 
 router.use(cors({
     credentials: true,
-    origin: "http://localhost:8081",
+    origin: ["http://localhost:8081", "https://clicka-project.vercel.app/"],
   })
 );
 

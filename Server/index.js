@@ -25,7 +25,11 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 
 // טוען משתני סביבה רק אם רץ מקומית (ב-Vercel זה לא חובה)
-if (process.env.NODE_ENV !== 'production') {
+// if (process.env.NODE_ENV !== 'production') {
+//   dotenv.config();
+// }
+
+if (!process.env.DATABASE_URL) {
   dotenv.config();
 }
 
