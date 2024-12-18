@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Image, FlatList, TouchableOpacity } from "react-native";
 import {
   Text,
   TextInput,
@@ -8,6 +8,7 @@ import {
   Menu,
   Provider,
 } from "react-native-paper";
+import * as ImagePicker from "expo-image-picker";
 
 export default function PersonalDetails({ navigation }) {
   const [formData, setFormData] = useState({
@@ -18,6 +19,7 @@ export default function PersonalDetails({ navigation }) {
   });
   const [menuVisible, setMenuVisible] = useState(false);
   const [error, setError] = useState("");
+  const [images, setImages] = useState([null, null, null, null]); // 4 קוביות ריקות בהתחלה
 
   const openMenu = () => setMenuVisible(true);
   const closeMenu = () => setMenuVisible(false);
@@ -34,6 +36,40 @@ export default function PersonalDetails({ navigation }) {
       return;
     }
   };
+
+  const pickImage = async (index) => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      alert("Permission to access camera roll is required!");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const updatedImages = [...images];
+      updatedImages[index] = result.assets[0].uri; // שמירת כתובת התמונה
+      setImages(updatedImages);
+    }
+  };
+
+  const renderImageBox = ({ item, index }) => (
+    <TouchableOpacity
+      style={styles.imageBox}
+      onPress={() => pickImage(index)}
+    >
+      {item ? (
+        <Image source={{ uri: item }} style={styles.image} />
+      ) : (
+        <Text style={styles.addText}>+</Text>
+      )}
+    </TouchableOpacity>
+  );
 
   return (
     <Provider>
@@ -73,8 +109,8 @@ export default function PersonalDetails({ navigation }) {
                 value={formData.gender}
                 mode="outlined"
                 style={styles.input}
-                onFocus={openMenu} // פותח את התפריט בלחיצה
-                showSoftInputOnFocus={false} // מונע פתיחת מקלדת
+                onFocus={openMenu}
+                showSoftInputOnFocus={false}
               />
             }
           >
@@ -101,6 +137,15 @@ export default function PersonalDetails({ navigation }) {
             />
           </Menu>
         </View>
+
+        <Text style={styles.subtitle}>הוסף תמונות:</Text>
+        <FlatList
+          data={images}
+          renderItem={renderImageBox}
+          keyExtractor={(item, index) => index.toString()}
+          numColumns={2}
+          style={styles.imageList}
+        />
 
         {error ? (
           <HelperText type="error" style={{ color: "#fff" }}>
@@ -129,6 +174,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#fff",
   },
+  subtitle: {
+    fontSize: 18,
+    marginBottom: 10,
+    color: "#fff",
+  },
   input: {
     marginBottom: 15,
   },
@@ -140,8 +190,25 @@ const styles = StyleSheet.create({
   dropdownContainer: {
     position: "relative",
   },
-  error: {
-    color: "red",
-    marginTop: 10,
+  imageList: {
+    marginVertical: 10,
+  },
+  imageBox: {
+    width: 100,
+    height: 100,
+    margin: 10,
+    backgroundColor: "#444",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 8,
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 8,
+  },
+  addText: {
+    fontSize: 24,
+    color: "#fff",
   },
 });

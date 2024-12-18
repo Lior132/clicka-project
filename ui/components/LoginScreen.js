@@ -19,9 +19,22 @@ const LoginScreen = ({ onLogin, navigation }) => {
     }
 
     try {
-      const response = axios.post('http://localhost:5001/SignUpUserToken', { token: userToken, mail: mail})
+      const userCredential = await signInWithEmailAndPassword(auth, mail, password);
+      // קבלת המשתמש המוזן
+      const user = userCredential.user;
+
+      // הוצאת ה-token
+      const idToken = await user.getIdToken();
+
+      // הדפסת ה-token
+      console.log('User token:', idToken);
+
+      const response = axios.post('http://localhost:5001/SignUpUserToken', {
+       token: idToken, 
+       mail: mail 
+      })
       console.log(response);
-      await signInWithEmailAndPassword(auth, mail, password); // קריאה לפונקציה המודולרית
+
       setEmail('');
       setPassword('');
       setError('');
@@ -74,7 +87,7 @@ const LoginScreen = ({ onLogin, navigation }) => {
 
           <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
             <Text style={styles.signupText}>
-              Don’t have an account? 
+              Don’t have an account?
               <Text style={styles.signupLink}> Sign Up</Text>
             </Text>
           </TouchableOpacity>
